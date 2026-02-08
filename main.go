@@ -32,7 +32,7 @@ type ScanRequest struct {
 
 func main() {
 	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fs)
+	http.Handle("/", noCache(fs))
 	http.HandleFunc("/ws", handleWebSocket)
 
 	port := "13334"
@@ -46,6 +46,15 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+}
+
+func noCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func openBrowser(url string) {

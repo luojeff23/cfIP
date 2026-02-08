@@ -59,14 +59,15 @@ function connectWS() {
 function startScan(type) {
     if (isScanning) return;
 
-    resetColumn(type);
+    const port = parseInt(portInput.value);
+    const targets = parseInputTargets();
+
+    resetColumn(type, targets, port);
 
     isScanning = true;
     disableButtons();
     updateStatus(`Starting ${type} test...`, 'info');
 
-    const ips = ipInput.value;
-    const port = parseInt(portInput.value);
     const downloadUrl = urlInput.value;
     const maxLatency = parseInt(maxLatencyInput.value);
 
@@ -74,7 +75,7 @@ function startScan(type) {
 
     const req = {
         type: type,
-        ips: ips.split('\n'), // server expects array of strings
+        ips: targets,
         port: port,
         download_url: downloadUrl,
         max_latency: maxLatency
@@ -103,11 +104,21 @@ function setSort(key, dir) {
     applySort();
 }
 
-function resetColumn(type) {
-    const rows = Array.from(resultsBody.querySelectorAll('tr'));
-    if (rows.length === 0) return;
+function parseInputTargets() {
+    const lines = ipInput.value
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line !== '');
+    return Array.from(new Set(lines));
+}
 
-    for (const row of rows) {
+function resetColumn(type, targets, port) {
+    if (!Array.isArray(targets) || targets.length === 0) return;
+
+    for (const target of targets) {
+        const row = document.getElementById(safeRowId(target, port));
+        if (!row) continue;
+
         if (type === 'ping') {
             const pingCell = row.querySelector('.ping-cell');
             if (pingCell) {
@@ -120,6 +131,11 @@ function resetColumn(type) {
                 speedCell.textContent = '-';
             }
             row.dataset.speed = '';
+        }
+
+        const statusCell = row.querySelector('.status-cell');
+        if (statusCell) {
+            statusCell.innerHTML = '<span class="status-badge">PENDING</span>';
         }
     }
 
