@@ -7,8 +7,8 @@ const sortState = {
     dir: 'none'  // 'none' | 'asc' | 'desc'
 };
 
-// Default IPs (Cloudflare ranges) if empty
-const defaultIPs = `1.1.1.1`;
+// Default IP input should be empty
+const defaultIPs = ``;
 
 // DOM Elements
 const ipInput = document.getElementById('ip-ranges');
