@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFping</title>
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CFping</h1>
+            <div id="status-text" class="status-text status-info">Initialize...</div>
+        </header>
+
+        <div class="card">
+            <div class="controls">
+                
+                <div class="control-column">
+                    <div class="control-group">
+                        <label for="ip-ranges">domain IP</label>
+                        <textarea id="ip-ranges" placeholder="输入需要测试的优选IP或域名"></textarea>
+                    </div>
+                </div>
+
+                <div class="control-column">
+                    <div class="control-group">
+                        <label for="port">Port</label>
+                        <input type="number" id="port" value="443">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="max-latency">Max Ping (ms)</label>
+                        <input type="number" id="max-latency" value="400">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="speed-url">Speed Test URL</label>
+                        <input type="text" id="speed-url"
+                               value="https://speed.cloudflare.com/__down?bytes=25000000"
+                               placeholder="https://speed.cloudflare.com/__down?bytes=25000000">
+                    </div>
+
+                    <div class="actions">
+                        <button id="btn-ping" class="btn-primary">Start Ping</button>
+                        <button id="btn-speed" class="btn-secondary">Start Speed Test</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Port</th>
+                        <th id="th-ping" class="sortable">Ping</th>
+                        <th id="th-speed" class="sortable">Download Speed</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Results will appear here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="app.js?v=2"></script>
+</body>
+</html>
