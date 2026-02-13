@@ -2,7 +2,6 @@
 
 A lightweight Cloudflare IP scanner with web UI for testing latency and download speed.
 
-![效果图](效果图.jpg)
 
 ## Features
 
