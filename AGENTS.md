@@ -1,42 +1,27 @@
-# Repository Guidelines
+# Agent Notes
 
-## Project Structure & Module Organization
+这个文件不是程序运行必需品。
 
-- `main.go` starts the HTTP server and WebSocket handler.
-- `scanner/` contains the Go scanning logic (`scanner.go`) for TCP ping and speed tests.
-- `static/` holds the web UI assets (`index.html`, `style.css`, `app.js`).
-- `go.mod` / `go.sum` define dependencies.
-- `run.bat` is a Windows helper to run the app.
-- `效果图.jpg` is a UI screenshot used in the README.
+它只给 AI 编码助手用，作用是让后续会话快速理解这个仓库该怎么改，避免每次从零猜。
 
-## Build, Test, and Development Commands
+## AI 进入仓库后先看什么
 
-- `go run main.go` — run the server locally (serves UI at `http://localhost:13334`).
-- `run.bat` — Windows shortcut for `go run main.go`.
-- `go build -o cfping` — build a local binary.
-- `go test ./...` — run tests (none currently in this repo, but use when adding tests).
+1. `docs/01-项目目标与验收.md`
+2. `docs/02-架构与开发规则.md`
+3. `scripts/check.ps1`
 
-## Coding Style & Naming Conventions
+## 当前协作规则
 
-- Go code should remain `gofmt`-formatted (tabs, standard Go layout).
-- Package names are short and lowercase (e.g., `scanner`).
-- Exported struct fields use `CamelCase` with JSON tags in `snake_case`.
-- Frontend files use simple, descriptive IDs/classes (e.g., `#results-body`, `.btn-primary`).
+- 先写清本次目标和验收标准，再改代码
+- 优先补测试，再改实现
+- 改完先跑 `.\scripts\check.ps1`
+- `main.go` / `request_logic.go` 放调度和可测试规则
+- `scanner/` 放底层网络探测
+- `static/` 只放前端展示和交互
 
-## Testing Guidelines
+## 最小检查清单
 
-- No automated tests are present; consider adding `_test.go` files under `scanner/`.
-- Prefer table-driven tests for scan edge cases (CIDR expansion, timeouts).
-- Run `go test ./...` before submitting changes that affect logic.
-
-## Commit & Pull Request Guidelines
-
-- This checkout does not include Git history, so no existing commit convention can be inferred.
-- Use short, imperative commit subjects (e.g., `Add speed test timeout`).
-- PRs should include: a brief description, test command(s) run, and UI screenshots if `static/` changes.
-
-## Configuration & Safety Notes
-
-- Default server port is `13334`; change in `main.go` if needed.
-- Speed tests use the URL in the UI (default is the Cloudflare download endpoint).
-- Be mindful when scanning large CIDR ranges; the server caps scans to 10,000 IPs.
+- Go 代码保持 `gofmt`
+- 影响逻辑的改动，至少更新相关 `_test.go`
+- 不要把核心规则塞进前端文件
+- 不要在没有测试保护的情况下大改结构

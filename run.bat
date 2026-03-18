@@ -1,5 +1,5 @@
 @echo off
 echo Starting cfping...
 cd /d "%~dp0"
-go run main.go
+go run .
 pause

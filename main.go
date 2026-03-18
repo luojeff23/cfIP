@@ -7,9 +7,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -39,8 +39,10 @@ func main() {
 	url := "http://localhost:" + port
 	fmt.Printf("Server started at %s\n", url)
 
-	// Open browser automatically
-	go openBrowser(url)
+	// Automated checks can skip browser launch to avoid noisy popups.
+	if os.Getenv("CFPING_SKIP_BROWSER") != "1" {
+		go openBrowser(url)
+	}
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -100,38 +102,10 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func processRequest(conn *websocket.Conn, messageType int, req ScanRequest) {
-	// Parse IPs
-	expandedIPs := []string{}
-	for _, line := range req.IPs {
-		parts := strings.Split(line, "\n")
-		for _, p := range parts {
-			trim := strings.TrimSpace(p)
-			if trim != "" {
-				if strings.Contains(trim, "/") {
-					ips, err := hosts(trim)
-					if err == nil {
-						expandedIPs = append(expandedIPs, ips...)
-					} else {
-						log.Println("CIDR parse error:", err)
-					}
-				} else {
-					expandedIPs = append(expandedIPs, trim)
-				}
-			}
-		}
-	}
-
-	if len(expandedIPs) > 10000 {
-		expandedIPs = expandedIPs[:10000]
-	}
+	expandedIPs := limitTargets(expandTargets(req.IPs), maxTargetsPerRequest)
 
 	var wg sync.WaitGroup
-	maxConcurrency := 50
-	if req.Type == "speed" {
-		// Speed tests compete for local bandwidth; run one-at-a-time for accurate per-target results.
-		maxConcurrency = 1
-	}
-	sem := make(chan struct{}, maxConcurrency)
+	sem := make(chan struct{}, scanConcurrency(req.Type))
 
 	// Mutex to protect WebSocket writes
 	var wsMutex sync.Mutex
@@ -150,7 +124,7 @@ func processRequest(conn *websocket.Conn, messageType int, req ScanRequest) {
 				result = scanner.SpeedTest(targetIP, req.Port, req.DownloadURL, 10*time.Second)
 			} else {
 				result = scanner.Ping(targetIP, req.Port, 2*time.Second)
-				if result != nil && result.Status == "ok" && req.MaxLatency > 0 && result.PingTime > int64(req.MaxLatency) {
+				if shouldSkipPingResult(result, req.MaxLatency) {
 					return
 				}
 			}
